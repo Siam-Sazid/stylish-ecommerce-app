@@ -8,6 +8,8 @@ abstract class AuthDataSource {
   Future<UserModel> register(String name, String email, String password);
   String? get token;
   void clearToken();
+  Future<void> forgotPassword(String email);
+  Future<void> resetPassword(String email, String otp, String newPassword);
 }
 
 class ApiAuthDataSource implements AuthDataSource {
@@ -68,5 +70,19 @@ class ApiAuthDataSource implements AuthDataSource {
     _token = data['token'] as String;
     appLogger.i('[AUTH] Register success — user: ${data['user']['name']}');
     return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    await _post('/api/auth/forgot-password', {'email': email});
+  }
+
+  @override
+  Future<void> resetPassword(String email, String otp, String newPassword) async {
+    await _post('/api/auth/reset-password', {
+      'email': email,
+      'otp': otp,
+      'newPassword': newPassword,
+    });
   }
 }

@@ -57,6 +57,8 @@ Future<void> initDependencies() async {
   Get.lazyPut(() => LoginUseCase(Get.find<AuthRepository>()), fenix: true);
   Get.lazyPut(() => RegisterUseCase(Get.find<AuthRepository>()), fenix: true);
   Get.lazyPut(() => LogoutUseCase(Get.find<AuthRepository>()), fenix: true);
+  Get.lazyPut(() => ForgotPasswordUseCase(Get.find<AuthRepository>()), fenix: true);
+  Get.lazyPut(() => ResetPasswordUseCase(Get.find<AuthRepository>()), fenix: true);
 
   // Payment use case
   Get.lazyPut(() => ProcessPaymentUseCase(Get.find<PaymentRepository>()), fenix: true);

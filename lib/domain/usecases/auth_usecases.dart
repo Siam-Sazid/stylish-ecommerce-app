@@ -22,3 +22,16 @@ class LogoutUseCase {
   LogoutUseCase(this.repository);
   Future<void> call() => repository.logout();
 }
+
+class ForgotPasswordUseCase {
+  final AuthRepository repository;
+  ForgotPasswordUseCase(this.repository);
+  Future<Either<Failure, Unit>> call(String email) => repository.forgotPassword(email);
+}
+
+class ResetPasswordUseCase {
+  final AuthRepository repository;
+  ResetPasswordUseCase(this.repository);
+  Future<Either<Failure, Unit>> call(String email, String otp, String newPassword) =>
+      repository.resetPassword(email, otp, newPassword);
+}

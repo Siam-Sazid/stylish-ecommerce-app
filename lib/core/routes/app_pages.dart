@@ -4,9 +4,12 @@ import '../../presentation/bindings/initial_binding.dart';
 import '../../presentation/bindings/home_binding.dart';
 import '../../presentation/bindings/checkout_binding.dart';
 import '../../presentation/bindings/product_detail_binding.dart';
+import '../../presentation/bindings/forgot_password_binding.dart';
 import '../../presentation/pages/splash/splash_page.dart';
 import '../../presentation/pages/auth/login_page.dart';
 import '../../presentation/pages/auth/register_page.dart';
+import '../../presentation/pages/auth/forgot_password_page.dart';
+import '../../presentation/pages/auth/reset_password_page.dart';
 import '../../presentation/pages/main/main_page.dart';
 import '../../presentation/pages/products/product_detail_page.dart';
 import '../../presentation/pages/checkout/checkout_page.dart';
@@ -25,6 +28,16 @@ class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterPage(),
+    ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordPage(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordPage(),
+      binding: ForgotPasswordBinding(),
     ),
     GetPage(
       name: AppRoutes.main,

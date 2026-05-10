@@ -44,4 +44,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   UserEntity? getCurrentUser() => _currentUser;
+
+  @override
+  Future<Either<Failure, Unit>> forgotPassword(String email) async {
+    try {
+      await dataSource.forgotPassword(email);
+      return Right(unit);
+    } catch (e) {
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> resetPassword(String email, String otp, String newPassword) async {
+    try {
+      await dataSource.resetPassword(email, otp, newPassword);
+      return Right(unit);
+    } catch (e) {
+      return Left(AuthFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
 }
