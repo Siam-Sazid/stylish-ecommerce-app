@@ -3,44 +3,21 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../controllers/auth_controller.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends GetView<AuthController> {
   const RegisterPage({super.key});
 
-  @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-  bool _obscurePass = true;
-  bool _obscureConfirm = true;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _confirmCtrl.dispose();
-    super.dispose();
-  }
-
   void _submit() {
-    if (_formKey.currentState!.validate()) {
-      Get.find<AuthController>().register(
-        _nameCtrl.text.trim(),
-        _emailCtrl.text.trim(),
-        _passwordCtrl.text,
+    if (controller.registerFormKey.currentState!.validate()) {
+      controller.register(
+        controller.registerNameCtrl.text.trim(),
+        controller.registerEmailCtrl.text.trim(),
+        controller.registerPasswordCtrl.text,
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = Get.find<AuthController>();
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -86,13 +63,13 @@ class _RegisterPageState extends State<RegisterPage> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Form(
-                key: _formKey,
+                key: controller.registerFormKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
                     Obx(() {
-                      if (auth.errorMessage.isEmpty) return const SizedBox.shrink();
+                      if (controller.errorMessage.isEmpty) return const SizedBox.shrink();
                       return Container(
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 16),
@@ -101,16 +78,16 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          auth.errorMessage.value,
+                          controller.errorMessage.value,
                           style: const TextStyle(color: AppColors.error, fontSize: 13),
                         ),
                       );
                     }),
 
-                    _buildLabel(context, 'Full Name'),
+                    _label(context, 'Full Name'),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _nameCtrl,
+                      controller: controller.registerNameCtrl,
                       textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(
                         hintText: 'Enter your full name',
@@ -120,10 +97,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    _buildLabel(context, 'Email'),
+                    _label(context, 'Email'),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _emailCtrl,
+                      controller: controller.registerEmailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: 'Enter your email',
@@ -137,46 +114,54 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    _buildLabel(context, 'Password'),
+                    _label(context, 'Password'),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _passwordCtrl,
-                      obscureText: _obscurePass,
-                      decoration: InputDecoration(
-                        hintText: 'Create a password (min 6 chars)',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePass ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscurePass = !_obscurePass),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Password is required';
-                        if (v.length < 6) return 'At least 6 characters';
-                        return null;
-                      },
-                    ),
+                    Obx(() => TextFormField(
+                          controller: controller.registerPasswordCtrl,
+                          obscureText: controller.obscureRegisterPass.value,
+                          decoration: InputDecoration(
+                            hintText: 'Create a password (min 6 chars)',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscureRegisterPass.value
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: controller.obscureRegisterPass.toggle,
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Password is required';
+                            if (v.length < 6) return 'At least 6 characters';
+                            return null;
+                          },
+                        )),
                     const SizedBox(height: 16),
 
-                    _buildLabel(context, 'Confirm Password'),
+                    _label(context, 'Confirm Password'),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _confirmCtrl,
-                      obscureText: _obscureConfirm,
-                      decoration: InputDecoration(
-                        hintText: 'Repeat your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Please confirm password';
-                        if (v != _passwordCtrl.text) return 'Passwords do not match';
-                        return null;
-                      },
-                    ),
+                    Obx(() => TextFormField(
+                          controller: controller.registerConfirmCtrl,
+                          obscureText: controller.obscureRegisterConfirm.value,
+                          decoration: InputDecoration(
+                            hintText: 'Repeat your password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscureRegisterConfirm.value
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: controller.obscureRegisterConfirm.toggle,
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Please confirm password';
+                            if (v != controller.registerPasswordCtrl.text) return 'Passwords do not match';
+                            return null;
+                          },
+                        )),
                     const SizedBox(height: 24),
 
                     Obx(() => SizedBox(
@@ -185,8 +170,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),
                             ),
-                            onPressed: auth.isLoading.value ? null : _submit,
-                            child: auth.isLoading.value
+                            onPressed: controller.isLoading.value ? null : _submit,
+                            child: controller.isLoading.value
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
@@ -221,6 +206,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildLabel(BuildContext context, String text) =>
+  Widget _label(BuildContext context, String text) =>
       Text(text, style: Theme.of(context).textTheme.labelLarge);
 }

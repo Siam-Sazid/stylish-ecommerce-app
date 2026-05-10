@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/app_logger.dart';
@@ -21,7 +22,33 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
+  // Login form state
+  final loginFormKey = GlobalKey<FormState>();
+  final loginEmailCtrl = TextEditingController();
+  final loginPasswordCtrl = TextEditingController();
+  final obscureLoginPass = true.obs;
+
+  // Register form state
+  final registerFormKey = GlobalKey<FormState>();
+  final registerNameCtrl = TextEditingController();
+  final registerEmailCtrl = TextEditingController();
+  final registerPasswordCtrl = TextEditingController();
+  final registerConfirmCtrl = TextEditingController();
+  final obscureRegisterPass = true.obs;
+  final obscureRegisterConfirm = true.obs;
+
   bool get isLoggedIn => currentUser.value != null;
+
+  @override
+  void onClose() {
+    loginEmailCtrl.dispose();
+    loginPasswordCtrl.dispose();
+    registerNameCtrl.dispose();
+    registerEmailCtrl.dispose();
+    registerPasswordCtrl.dispose();
+    registerConfirmCtrl.dispose();
+    super.onClose();
+  }
 
   Future<void> login(String email, String password) async {
     isLoading.value = true;
@@ -38,6 +65,8 @@ class AuthController extends GetxController {
         (user) {
           appLogger.i('[AuthController] login success — navigating to main');
           currentUser.value = user;
+          loginEmailCtrl.clear();
+          loginPasswordCtrl.clear();
           Get.offAllNamed(AppRoutes.main);
         },
       );
@@ -64,6 +93,10 @@ class AuthController extends GetxController {
         (user) {
           appLogger.i('[AuthController] register success — navigating to main');
           currentUser.value = user;
+          registerNameCtrl.clear();
+          registerEmailCtrl.clear();
+          registerPasswordCtrl.clear();
+          registerConfirmCtrl.clear();
           Get.offAllNamed(AppRoutes.main);
         },
       );

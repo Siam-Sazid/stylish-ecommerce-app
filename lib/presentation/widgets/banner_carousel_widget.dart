@@ -1,47 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../presentation/controllers/home_controller.dart';
 
-class BannerCarouselWidget extends StatefulWidget {
+class BannerCarouselWidget extends GetView<HomeController> {
   const BannerCarouselWidget({super.key});
 
   @override
-  State<BannerCarouselWidget> createState() => _BannerCarouselWidgetState();
-}
-
-class _BannerCarouselWidgetState extends State<BannerCarouselWidget> {
-  final PageController _pageController = PageController();
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _startAutoScroll();
-  }
-
-  void _startAutoScroll() {
-    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
-      final controller = Get.find<HomeController>();
-      final next = (controller.currentBannerIndex.value + 1) % HomeController.banners.length;
-      _pageController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HomeController>();
     final banners = HomeController.banners;
 
     return Column(
@@ -49,13 +14,10 @@ class _BannerCarouselWidgetState extends State<BannerCarouselWidget> {
         SizedBox(
           height: 180,
           child: PageView.builder(
-            controller: _pageController,
+            controller: controller.pageController,
             itemCount: banners.length,
             onPageChanged: (i) => controller.currentBannerIndex.value = i,
-            itemBuilder: (_, index) {
-              final banner = banners[index];
-              return _BannerItem(banner: banner);
-            },
+            itemBuilder: (_, index) => _BannerItem(banner: banners[index]),
           ),
         ),
         const SizedBox(height: 12),
@@ -104,7 +66,6 @@ class _BannerItem extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Decorative circles
           Positioned(
             right: -20,
             top: -20,

@@ -3,6 +3,7 @@ import '../routes/app_routes.dart';
 import '../../presentation/bindings/initial_binding.dart';
 import '../../presentation/bindings/home_binding.dart';
 import '../../presentation/bindings/checkout_binding.dart';
+import '../../presentation/bindings/product_detail_binding.dart';
 import '../../presentation/pages/splash/splash_page.dart';
 import '../../presentation/pages/auth/login_page.dart';
 import '../../presentation/pages/auth/register_page.dart';
@@ -33,6 +34,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.productDetail,
       page: () => const ProductDetailPage(),
+      binding: ProductDetailBinding(),
     ),
     GetPage(
       name: AppRoutes.checkout,

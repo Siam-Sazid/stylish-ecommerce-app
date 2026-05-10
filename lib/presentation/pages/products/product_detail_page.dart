@@ -3,30 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
-import '../../../domain/entities/product_entity.dart';
 import '../../controllers/cart_controller.dart';
+import '../../controllers/product_detail_controller.dart';
 
-class ProductDetailPage extends StatefulWidget {
+class ProductDetailPage extends GetView<ProductDetailController> {
   const ProductDetailPage({super.key});
-
-  @override
-  State<ProductDetailPage> createState() => _ProductDetailPageState();
-}
-
-class _ProductDetailPageState extends State<ProductDetailPage> {
-  late final ProductEntity product;
-  String? selectedSize;
-  String? selectedColor;
-  int quantity = 1;
-  bool _descExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    product = Get.arguments as ProductEntity;
-    if (product.sizes.isNotEmpty) selectedSize = product.sizes.first;
-    if (product.colors.isNotEmpty) selectedColor = product.colors.first;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +55,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: CachedNetworkImage(
-                    imageUrl: product.imageUrl,
+                    imageUrl: controller.product.imageUrl,
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
                       color: AppColors.background,
@@ -101,18 +82,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       // Tags row
                       Row(
                         children: [
-                          if (product.isNew)
+                          if (controller.product.isNew)
                             _Tag(label: 'NEW', color: AppColors.success),
-                          if (product.discountPercent > 0)
+                          if (controller.product.discountPercent > 0)
                             _Tag(
-                              label: '-${product.discountPercent.toInt()}% OFF',
+                              label: '-${controller.product.discountPercent.toInt()}% OFF',
                               color: AppColors.accent,
                             ),
                         ],
                       ),
-                      if (product.isNew || product.discountPercent > 0) const SizedBox(height: 10),
+                      if (controller.product.isNew || controller.product.discountPercent > 0)
+                        const SizedBox(height: 10),
 
-                      Text(product.name, style: Theme.of(context).textTheme.headlineMedium),
+                      Text(controller.product.name, style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 10),
 
                       // Rating row
@@ -121,11 +103,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           const Icon(Icons.star_rounded, color: AppColors.star, size: 18),
                           const SizedBox(width: 4),
                           Text(
-                            '${product.rating}',
+                            '${controller.product.rating}',
                             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                           ),
                           Text(
-                            '  (${product.reviewCount} reviews)',
+                            '  (${controller.product.reviewCount} reviews)',
                             style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                           ),
                         ],
@@ -137,17 +119,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '\$${product.price.toStringAsFixed(2)}',
+                            '\$${controller.product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
                               color: AppColors.primary,
                             ),
                           ),
-                          if (product.originalPrice != null) ...[
+                          if (controller.product.originalPrice != null) ...[
                             const SizedBox(width: 10),
                             Text(
-                              '\$${product.originalPrice!.toStringAsFixed(2)}',
+                              '\$${controller.product.originalPrice!.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: AppColors.textHint,
@@ -164,155 +146,155 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       // Description
                       Text('Description', style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 8),
-                      AnimatedCrossFade(
-                        duration: const Duration(milliseconds: 200),
-                        crossFadeState: _descExpanded
-                            ? CrossFadeState.showSecond
-                            : CrossFadeState.showFirst,
-                        firstChild: Text(
-                          product.description,
-                          style: const TextStyle(color: AppColors.textSecondary, height: 1.7, fontSize: 14),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        secondChild: Text(
-                          product.description,
-                          style: const TextStyle(color: AppColors.textSecondary, height: 1.7, fontSize: 14),
-                        ),
-                      ),
+                      Obx(() => AnimatedCrossFade(
+                            duration: const Duration(milliseconds: 200),
+                            crossFadeState: controller.descExpanded.value
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            firstChild: Text(
+                              controller.product.description,
+                              style: const TextStyle(color: AppColors.textSecondary, height: 1.7, fontSize: 14),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            secondChild: Text(
+                              controller.product.description,
+                              style: const TextStyle(color: AppColors.textSecondary, height: 1.7, fontSize: 14),
+                            ),
+                          )),
                       TextButton(
-                        onPressed: () => setState(() => _descExpanded = !_descExpanded),
+                        onPressed: controller.toggleDescription,
                         style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                        child: Text(
-                          _descExpanded ? 'Show less' : 'Read more',
-                          style: const TextStyle(color: AppColors.primary, fontSize: 13),
-                        ),
+                        child: Obx(() => Text(
+                              controller.descExpanded.value ? 'Show less' : 'Read more',
+                              style: const TextStyle(color: AppColors.primary, fontSize: 13),
+                            )),
                       ),
 
                       // Colors
-                      if (product.colors.isNotEmpty) ...[
+                      if (controller.product.colors.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         const Divider(),
                         const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text('Color: ', style: Theme.of(context).textTheme.titleMedium),
-                            const SizedBox(width: 4),
-                            Text(
-                              selectedColor ?? '',
-                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: product.colors.map((color) {
-                            final isSelected = selectedColor == color;
-                            return GestureDetector(
-                              onTap: () => setState(() => selectedColor = color),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : AppColors.surface,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.primary : AppColors.divider,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  color,
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : AppColors.text,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-
-                      // Sizes
-                      if (product.sizes.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                        Obx(() => Row(
                               children: [
-                                Text('Size: ', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Color: ', style: Theme.of(context).textTheme.titleMedium),
                                 const SizedBox(width: 4),
                                 Text(
-                                  selectedSize ?? '',
+                                  controller.selectedColor.value,
                                   style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                                 ),
                               ],
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                              child: const Text('Size Guide', style: TextStyle(fontSize: 12)),
-                            ),
-                          ],
-                        ),
+                            )),
                         const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: product.sizes.map((size) {
-                            final isSelected = selectedSize == size;
-                            return GestureDetector(
-                              onTap: () => setState(() => selectedSize = size),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.primary : AppColors.surface,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.primary : AppColors.divider,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    size,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : AppColors.text,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
+                        Obx(() => Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: controller.product.colors.map((color) {
+                                final isSelected = controller.selectedColor.value == color;
+                                return GestureDetector(
+                                  onTap: () => controller.selectColor(color),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? AppColors.primary : AppColors.surface,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected ? AppColors.primary : AppColors.divider,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      color,
+                                      style: TextStyle(
+                                        color: isSelected ? Colors.white : AppColors.text,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
+                                );
+                              }).toList(),
+                            )),
+                      ],
+
+                      // Sizes
+                      if (controller.product.sizes.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 12),
+                        Obx(() => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text('Size: ', style: Theme.of(context).textTheme.titleMedium),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      controller.selectedSize.value,
+                                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                                TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                                  child: const Text('Size Guide', style: TextStyle(fontSize: 12)),
+                                ),
+                              ],
+                            )),
+                        const SizedBox(height: 10),
+                        Obx(() => Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: controller.product.sizes.map((size) {
+                                final isSelected = controller.selectedSize.value == size;
+                                return GestureDetector(
+                                  onTap: () => controller.selectSize(size),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? AppColors.primary : AppColors.surface,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: isSelected ? AppColors.primary : AppColors.divider,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        size,
+                                        style: TextStyle(
+                                          color: isSelected ? Colors.white : AppColors.text,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            )),
                       ],
 
                       // Quantity
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Quantity', style: Theme.of(context).textTheme.titleMedium),
-                          _QuantitySelector(
-                            quantity: quantity,
-                            onDecrement: () { if (quantity > 1) setState(() => quantity--); },
-                            onIncrement: () => setState(() => quantity++),
-                          ),
-                        ],
-                      ),
+                      Obx(() => Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Quantity', style: Theme.of(context).textTheme.titleMedium),
+                              _QuantitySelector(
+                                quantity: controller.quantity.value,
+                                onDecrement: controller.decrement,
+                                onIncrement: controller.increment,
+                              ),
+                            ],
+                          )),
                     ],
                   ),
                 ),
@@ -335,45 +317,45 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primary, width: 1.5),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: IconButton(
-                      onPressed: () => cart.addToCart(
-                        product,
-                        size: selectedSize,
-                        color: selectedColor,
-                        quantity: quantity,
+              child: Obx(() => Row(
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primary, width: 1.5),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: IconButton(
+                          onPressed: () => cart.addToCart(
+                            controller.product,
+                            size: controller.selectedSize.value.isEmpty ? null : controller.selectedSize.value,
+                            color: controller.selectedColor.value.isEmpty ? null : controller.selectedColor.value,
+                            quantity: controller.quantity.value,
+                          ),
+                          icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.primary),
+                        ),
                       ),
-                      icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          cart.addToCart(
-                            product,
-                            size: selectedSize,
-                            color: selectedColor,
-                            quantity: quantity,
-                          );
-                          Get.toNamed(AppRoutes.cart);
-                        },
-                        child: const Text('Buy Now'),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              cart.addToCart(
+                                controller.product,
+                                size: controller.selectedSize.value.isEmpty ? null : controller.selectedSize.value,
+                                color: controller.selectedColor.value.isEmpty ? null : controller.selectedColor.value,
+                                quantity: controller.quantity.value,
+                              );
+                              Get.toNamed(AppRoutes.cart);
+                            },
+                            child: const Text('Buy Now'),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
+                    ],
+                  )),
             ),
           ),
         ],

@@ -4,35 +4,20 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../controllers/auth_controller.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends GetView<AuthController> {
   const LoginPage({super.key});
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  bool _obscurePass = true;
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    super.dispose();
-  }
-
   void _submit() {
-    if (_formKey.currentState!.validate()) {
-      Get.find<AuthController>().login(_emailCtrl.text.trim(), _passwordCtrl.text);
+    if (controller.loginFormKey.currentState!.validate()) {
+      controller.login(
+        controller.loginEmailCtrl.text.trim(),
+        controller.loginPasswordCtrl.text,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = Get.find<AuthController>();
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -83,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Form(
-                key: _formKey,
+                key: controller.loginFormKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Error message
                     Obx(() {
-                      if (auth.errorMessage.isEmpty) return const SizedBox.shrink();
+                      if (controller.errorMessage.isEmpty) return const SizedBox.shrink();
                       return Container(
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 16),
@@ -106,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                auth.errorMessage.value,
+                                controller.errorMessage.value,
                                 style: const TextStyle(color: AppColors.error, fontSize: 13),
                               ),
                             ),
@@ -118,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text('Email', style: Theme.of(context).textTheme.labelLarge),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _emailCtrl,
+                      controller: controller.loginEmailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: 'Enter your email',
@@ -134,23 +119,27 @@ class _LoginPageState extends State<LoginPage> {
 
                     Text('Password', style: Theme.of(context).textTheme.labelLarge),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _passwordCtrl,
-                      obscureText: _obscurePass,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePass ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscurePass = !_obscurePass),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Password is required';
-                        if (v.length < 6) return 'Password must be at least 6 characters';
-                        return null;
-                      },
-                    ),
+                    Obx(() => TextFormField(
+                          controller: controller.loginPasswordCtrl,
+                          obscureText: controller.obscureLoginPass.value,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscureLoginPass.value
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: controller.obscureLoginPass.toggle,
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Password is required';
+                            if (v.length < 6) return 'Password must be at least 6 characters';
+                            return null;
+                          },
+                        )),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -163,8 +152,8 @@ class _LoginPageState extends State<LoginPage> {
                     Obx(() => SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: auth.isLoading.value ? null : _submit,
-                            child: auth.isLoading.value
+                            onPressed: controller.isLoading.value ? null : _submit,
+                            child: controller.isLoading.value
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
@@ -175,7 +164,6 @@ class _LoginPageState extends State<LoginPage> {
                         )),
                     const SizedBox(height: 24),
 
-                    // Divider
                     Row(
                       children: [
                         const Expanded(child: Divider()),
@@ -188,7 +176,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Social buttons
                     Row(
                       children: [
                         Expanded(

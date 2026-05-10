@@ -4,26 +4,11 @@ import '../../../core/constants/app_colors.dart';
 import '../../controllers/home_controller.dart';
 import '../../widgets/product_card_widget.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends GetView<HomeController> {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  final _searchCtrl = TextEditingController();
-  final _hasText = false.obs;
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HomeController>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -37,21 +22,21 @@ class _SearchPageState extends State<SearchPage> {
             color: AppColors.surface,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: TextField(
-              controller: _searchCtrl,
+              controller: controller.searchCtrl,
               autofocus: false,
               onChanged: (value) {
-                _hasText.value = value.isNotEmpty;
+                controller.searchHasText.value = value.isNotEmpty;
                 controller.search(value);
               },
               decoration: InputDecoration(
                 hintText: 'Search products, brands...',
                 prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: Obx(() => _hasText.value
+                suffixIcon: Obx(() => controller.searchHasText.value
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
-                          _searchCtrl.clear();
-                          _hasText.value = false;
+                          controller.searchCtrl.clear();
+                          controller.searchHasText.value = false;
                           controller.search('');
                         },
                       )
@@ -70,13 +55,17 @@ class _SearchPageState extends State<SearchPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _hasText.value ? Icons.search_off_rounded : Icons.search_rounded,
+                        controller.searchHasText.value
+                            ? Icons.search_off_rounded
+                            : Icons.search_rounded,
                         size: 64,
                         color: AppColors.textHint,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _hasText.value ? 'No results found' : 'Search for products',
+                        controller.searchHasText.value
+                            ? 'No results found'
+                            : 'Search for products',
                         style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
                       ),
                     ],

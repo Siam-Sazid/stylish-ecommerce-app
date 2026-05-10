@@ -5,39 +5,17 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/checkout_controller.dart';
 
-class CheckoutPage extends StatefulWidget {
+class CheckoutPage extends GetView<CheckoutController> {
   const CheckoutPage({super.key});
-
-  @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends State<CheckoutPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
-  final _zipCtrl = TextEditingController();
-  int _selectedPayment = 0;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _addressCtrl.dispose();
-    _cityCtrl.dispose();
-    _zipCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final cart = Get.find<CartController>();
-    final checkout = Get.find<CheckoutController>();
     final auth = Get.find<AuthController>();
 
     return Obx(() {
-      if (checkout.paymentSuccess.value) {
-        return _SuccessView();
+      if (controller.paymentSuccess.value) {
+        return const _SuccessView();
       }
       return Scaffold(
         backgroundColor: AppColors.background,
@@ -48,7 +26,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Form(
-            key: _formKey,
+            key: controller.checkoutFormKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -107,7 +85,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       Text('Shipping Information', style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: _nameCtrl..text = auth.currentUser.value?.name ?? '',
+                        controller: controller.nameCtrl,
                         decoration: const InputDecoration(
                           labelText: 'Full Name',
                           prefixIcon: Icon(Icons.person_outline),
@@ -116,7 +94,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
-                        controller: _addressCtrl,
+                        controller: controller.addressCtrl,
                         decoration: const InputDecoration(
                           labelText: 'Street Address',
                           prefixIcon: Icon(Icons.location_on_outlined),
@@ -128,7 +106,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: _cityCtrl,
+                              controller: controller.cityCtrl,
                               decoration: const InputDecoration(labelText: 'City'),
                               validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                             ),
@@ -136,7 +114,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: TextFormField(
-                              controller: _zipCtrl,
+                              controller: controller.zipCtrl,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(labelText: 'ZIP Code'),
                               validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
@@ -158,32 +136,36 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     children: [
                       Text('Payment Method', style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 12),
-                      _PaymentOption(
-                        index: 0,
-                        selected: _selectedPayment,
-                        icon: Icons.credit_card_rounded,
-                        label: 'Credit / Debit Card',
-                        sublabel: 'Powered by Stripe',
-                        onTap: () => setState(() => _selectedPayment = 0),
-                      ),
-                      const SizedBox(height: 8),
-                      _PaymentOption(
-                        index: 1,
-                        selected: _selectedPayment,
-                        icon: Icons.account_balance_wallet_outlined,
-                        label: 'PayPal',
-                        sublabel: 'Fast & secure',
-                        onTap: () => setState(() => _selectedPayment = 1),
-                      ),
-                      const SizedBox(height: 8),
-                      _PaymentOption(
-                        index: 2,
-                        selected: _selectedPayment,
-                        icon: Icons.local_shipping_outlined,
-                        label: 'Cash on Delivery',
-                        sublabel: 'Pay when you receive',
-                        onTap: () => setState(() => _selectedPayment = 2),
-                      ),
+                      Obx(() => Column(
+                            children: [
+                              _PaymentOption(
+                                index: 0,
+                                selected: controller.selectedPayment.value,
+                                icon: Icons.credit_card_rounded,
+                                label: 'Credit / Debit Card',
+                                sublabel: 'Powered by Stripe',
+                                onTap: () => controller.selectedPayment.value = 0,
+                              ),
+                              const SizedBox(height: 8),
+                              _PaymentOption(
+                                index: 1,
+                                selected: controller.selectedPayment.value,
+                                icon: Icons.account_balance_wallet_outlined,
+                                label: 'PayPal',
+                                sublabel: 'Fast & secure',
+                                onTap: () => controller.selectedPayment.value = 1,
+                              ),
+                              const SizedBox(height: 8),
+                              _PaymentOption(
+                                index: 2,
+                                selected: controller.selectedPayment.value,
+                                icon: Icons.local_shipping_outlined,
+                                label: 'Cash on Delivery',
+                                sublabel: 'Pay when you receive',
+                                onTap: () => controller.selectedPayment.value = 2,
+                              ),
+                            ],
+                          )),
                     ],
                   ),
                 ),
@@ -193,17 +175,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: checkout.isProcessing.value
+                        onPressed: controller.isProcessing.value
                             ? null
                             : () {
-                                if (_formKey.currentState!.validate()) {
-                                  checkout.processPayment(
+                                if (controller.checkoutFormKey.currentState!.validate()) {
+                                  controller.processPayment(
                                     amount: cart.total,
                                     email: auth.currentUser.value?.email ?? '',
                                   );
                                 }
                               },
-                        child: checkout.isProcessing.value
+                        child: controller.isProcessing.value
                             ? const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -344,6 +326,8 @@ class _PaymentOption extends StatelessWidget {
 }
 
 class _SuccessView extends StatelessWidget {
+  const _SuccessView();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/usecases/process_payment_usecase.dart';
+import '../controllers/auth_controller.dart';
 import 'cart_controller.dart';
 
 class CheckoutController extends GetxController {
@@ -11,11 +13,29 @@ class CheckoutController extends GetxController {
   final RxBool isProcessing = false.obs;
   final RxBool paymentSuccess = false.obs;
   final RxString errorMessage = ''.obs;
+  final selectedPayment = 0.obs;
 
-  final RxString fullName = ''.obs;
-  final RxString address = ''.obs;
-  final RxString city = ''.obs;
-  final RxString zipCode = ''.obs;
+  // Shipping form
+  final checkoutFormKey = GlobalKey<FormState>();
+  final nameCtrl = TextEditingController();
+  final addressCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  final zipCtrl = TextEditingController();
+
+  @override
+  void onInit() {
+    super.onInit();
+    nameCtrl.text = Get.find<AuthController>().currentUser.value?.name ?? '';
+  }
+
+  @override
+  void onClose() {
+    nameCtrl.dispose();
+    addressCtrl.dispose();
+    cityCtrl.dispose();
+    zipCtrl.dispose();
+    super.onClose();
+  }
 
   Future<void> processPayment({
     required double amount,

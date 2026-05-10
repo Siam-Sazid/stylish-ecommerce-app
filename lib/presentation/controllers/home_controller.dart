@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/category_entity.dart';
@@ -28,6 +30,14 @@ class HomeController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxInt currentBannerIndex = 0.obs;
 
+  // Search form state
+  final searchCtrl = TextEditingController();
+  final searchHasText = false.obs;
+
+  // Banner carousel state
+  final pageController = PageController();
+  Timer? _bannerTimer;
+
   static const List<Map<String, dynamic>> banners = [
     {
       'title': 'Summer Sale',
@@ -56,6 +66,27 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadData();
+    _startBannerAutoScroll();
+  }
+
+  @override
+  void onClose() {
+    _bannerTimer?.cancel();
+    pageController.dispose();
+    searchCtrl.dispose();
+    super.onClose();
+  }
+
+  void _startBannerAutoScroll() {
+    _bannerTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!pageController.hasClients) return;
+      final next = (currentBannerIndex.value + 1) % banners.length;
+      pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   Future<void> loadData() async {
