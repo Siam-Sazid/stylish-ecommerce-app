@@ -13,6 +13,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final _searchCtrl = TextEditingController();
+  final _hasText = false.obs;
 
   @override
   void dispose() {
@@ -38,17 +39,20 @@ class _SearchPageState extends State<SearchPage> {
             child: TextField(
               controller: _searchCtrl,
               autofocus: false,
-              onChanged: controller.search,
+              onChanged: (value) {
+                _hasText.value = value.isNotEmpty;
+                controller.search(value);
+              },
               decoration: InputDecoration(
                 hintText: 'Search products, brands...',
                 prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: Obx(() => _searchCtrl.text.isNotEmpty
+                suffixIcon: Obx(() => _hasText.value
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchCtrl.clear();
+                          _hasText.value = false;
                           controller.search('');
-                          setState(() {});
                         },
                       )
                     : const SizedBox.shrink()),
@@ -66,13 +70,13 @@ class _SearchPageState extends State<SearchPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _searchCtrl.text.isEmpty ? Icons.search_rounded : Icons.search_off_rounded,
+                        _hasText.value ? Icons.search_off_rounded : Icons.search_rounded,
                         size: 64,
                         color: AppColors.textHint,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _searchCtrl.text.isEmpty ? 'Search for products' : 'No results found',
+                        _hasText.value ? 'No results found' : 'Search for products',
                         style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
                       ),
                     ],

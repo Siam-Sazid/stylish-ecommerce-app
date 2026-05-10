@@ -1,6 +1,12 @@
 # Claude Code
 .claude/
 
+# Backend (Node.js — kept local only)
+/backend/
+
+# Project documentation for Claude Code
+CLAUDE.md
+
 # Miscellaneous
 *.class
 *.log

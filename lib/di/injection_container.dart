@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../core/constants/app_config.dart';
 import '../data/datasources/product_datasource.dart';
 import '../data/datasources/auth_datasource.dart';
 import '../data/repositories/product_repository_impl.dart';
@@ -15,9 +16,15 @@ import '../domain/usecases/auth_usecases.dart';
 import '../domain/usecases/process_payment_usecase.dart';
 
 Future<void> initDependencies() async {
-  // Data sources
-  Get.lazyPut<ProductDataSource>(() => MockProductDataSource(), fenix: true);
-  Get.lazyPut<AuthDataSource>(() => MockAuthDataSource(), fenix: true);
+  // Data sources (real API)
+  Get.lazyPut<ProductDataSource>(
+    () => ApiProductDataSource(baseUrl: AppConfig.baseUrl),
+    fenix: true,
+  );
+  Get.lazyPut<AuthDataSource>(
+    () => ApiAuthDataSource(baseUrl: AppConfig.baseUrl),
+    fenix: true,
+  );
 
   // Repositories
   Get.lazyPut<ProductRepository>(

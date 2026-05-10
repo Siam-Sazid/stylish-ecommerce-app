@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/usecases/cart_usecases.dart';
+import 'package:flutter/material.dart';
 
 class CartController extends GetxController {
   final AddToCartUseCase _addToCart;

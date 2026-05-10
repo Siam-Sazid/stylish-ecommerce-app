@@ -39,6 +39,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> logout() async {
     _currentUser = null;
+    dataSource.clearToken();
   }
 
   @override
