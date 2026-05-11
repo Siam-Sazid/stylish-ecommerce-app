@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../core/constants/app_endpoints.dart';
 import '../../core/utils/app_logger.dart';
 import '../models/user_model.dart';
 
@@ -54,7 +55,7 @@ class ApiAuthDataSource implements AuthDataSource {
 
   @override
   Future<UserModel> login(String email, String password) async {
-    final data = await _post('/api/auth/login', {'email': email, 'password': password});
+    final data = await _post(AppEndpoints.login, {'email': email, 'password': password});
     _token = data['token'] as String;
     appLogger.i('[AUTH] Login success — user: ${data['user']['name']}');
     return UserModel.fromJson(data['user'] as Map<String, dynamic>);
@@ -62,7 +63,7 @@ class ApiAuthDataSource implements AuthDataSource {
 
   @override
   Future<UserModel> register(String name, String email, String password) async {
-    final data = await _post('/api/auth/register', {
+    final data = await _post(AppEndpoints.register, {
       'name': name,
       'email': email,
       'password': password,
@@ -74,12 +75,12 @@ class ApiAuthDataSource implements AuthDataSource {
 
   @override
   Future<void> forgotPassword(String email) async {
-    await _post('/api/auth/forgot-password', {'email': email});
+    await _post(AppEndpoints.forgotPassword, {'email': email});
   }
 
   @override
   Future<void> resetPassword(String email, String otp, String newPassword) async {
-    await _post('/api/auth/reset-password', {
+    await _post(AppEndpoints.resetPassword, {
       'email': email,
       'otp': otp,
       'newPassword': newPassword,

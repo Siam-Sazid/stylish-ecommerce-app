@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../core/constants/app_endpoints.dart';
 import '../models/product_model.dart';
 import '../models/category_model.dart';
 
@@ -27,38 +28,38 @@ class ApiProductDataSource implements ProductDataSource {
 
   @override
   Future<List<ProductModel>> getAllProducts() async {
-    final data = await _get('/api/products') as List;
+    final data = await _get(AppEndpoints.products) as List;
     return data.map((j) => ProductModel.fromJson(j)).toList();
   }
 
   @override
   Future<ProductModel> getProductById(String id) async {
-    final data = await _get('/api/products/$id');
+    final data = await _get(AppEndpoints.productById(id));
     return ProductModel.fromJson(data);
   }
 
   @override
   Future<List<ProductModel>> getProductsByCategory(String categoryId) async {
-    final data = await _get('/api/products/category/$categoryId') as List;
+    final data = await _get(AppEndpoints.productsByCategory(categoryId)) as List;
     return data.map((j) => ProductModel.fromJson(j)).toList();
   }
 
   @override
   Future<List<ProductModel>> getFeaturedProducts() async {
-    final data = await _get('/api/products/featured') as List;
+    final data = await _get(AppEndpoints.featuredProducts) as List;
     return data.map((j) => ProductModel.fromJson(j)).toList();
   }
 
   @override
   Future<List<ProductModel>> searchProducts(String query) async {
     final encoded = Uri.encodeComponent(query);
-    final data = await _get('/api/products/search?q=$encoded') as List;
+    final data = await _get('${AppEndpoints.searchProducts}?q=$encoded') as List;
     return data.map((j) => ProductModel.fromJson(j)).toList();
   }
 
   @override
   Future<List<CategoryModel>> getCategories() async {
-    final data = await _get('/api/categories') as List;
+    final data = await _get(AppEndpoints.categories) as List;
     return data.map((j) => CategoryModel.fromJson(j)).toList();
   }
 }

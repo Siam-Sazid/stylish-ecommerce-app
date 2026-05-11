@@ -1,8 +1,9 @@
 # Claude Code
 .claude/
 
-# Backend (Node.js — kept local only)
-/backend/
+# Backend secrets and dependencies
+/backend/.env
+/backend/node_modules/
 
 # Project documentation for Claude Code
 CLAUDE.md
