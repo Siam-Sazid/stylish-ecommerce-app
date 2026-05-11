@@ -107,10 +107,10 @@ e_commerce_app/
 │           ├── category_chip_widget.dart
 │           ├── banner_carousel_widget.dart
 │           └── cart_item_widget.dart
-├── backend/                               ← Node.js (gitignored — local dev only)
+├── backend/                               ← Node.js (local dev only)
 ├── android/
-│   └── app/src/main/AndroidManifest.xml  ← INTERNET permission + usesCleartextTraffic
-└── CLAUDE.md                              ← Internal dev notes (gitignored)
+    └── app/src/main/AndroidManifest.xml  ← INTERNET permission + usesCleartextTraffic
+
 ```
 
 ---
@@ -130,29 +130,6 @@ Presentation  →  Domain  ←  Data
 The layers are wired together by `injection_container.dart` using GetX `lazyPut`.
 
 ---
-
-## Data Flow
-
-How data travels from the API to the UI (using Load Products as an example):
-
-```
-HomePage
-  └── HomeController.loadData()
-        └── GetAllProductsUseCase.call()
-              └── ProductRepositoryImpl.getAllProducts()
-                    └── ApiProductDataSource._get(AppEndpoints.products)
-                          └── http.Client → GET http://localhost:3000/api/products
-                                └── ProductModel.fromJson(json) → ProductEntity
-```
-
-1. **`ApiProductDataSource`** fires the HTTP request and parses each JSON object into a `ProductModel`.
-2. **`ProductRepositoryImpl`** wraps the result in `Right(products)` on success, or `Left(ServerFailure(...))` if anything throws.
-3. **`GetAllProductsUseCase`** passes the `Either` straight through to the controller.
-4. **`HomeController`** calls `.fold()` on the `Either` — failure updates `errorMessage.value`, success calls `allProducts.assignAll(products)`.
-5. **`HomePage`** `Obx` blocks watching `isLoading` and `displayedProducts` automatically rebuild.
-
----
-
 ## Routes
 
 | Constant | Path | Page | Binding |
@@ -281,30 +258,6 @@ flutter run
 | Success | `#10B981` | `AppColors.success` |
 
 ---
-
-## Key Patterns
-
-### Either for error handling
-All data layer errors are caught in repository impls and returned as `Left(SomeFailure(...))`. Controllers always use `.fold()` to handle both sides. Exceptions never leak into the presentation layer.
-
-### Obx rule
-Always use `Obx` with a real GetX observable (`RxBool`, `RxString`, `RxList`, etc.). Never wrap non-observable state (e.g. `TextEditingController.text`) in `Obx` — use an `.obs` variable updated in `onChanged` instead.
-
-### Auth token
-`ApiAuthDataSource` stores the JWT in memory (`_token`). It is cleared on logout via `dataSource.clearToken()`. The token is not persisted — it is lost on app restart.
-
-### Logging
-Use `appLogger` from `lib/core/utils/app_logger.dart` everywhere. Never use `print`.
-
-```dart
-appLogger.i('info message');
-appLogger.d('debug message');
-appLogger.w('warning message');
-appLogger.e('error message', error: e, stackTrace: stack);
-```
-
----
-
 ## Not Yet Implemented
 
 - Auth token persistence (lost on app restart — `shared_preferences` is installed but unused)
