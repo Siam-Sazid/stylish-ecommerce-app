@@ -9,14 +9,17 @@ class AuthController extends GetxController {
   final LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
+  final RestoreSessionUseCase _restoreSessionUseCase;
 
   AuthController({
     required LoginUseCase loginUseCase,
     required RegisterUseCase registerUseCase,
     required LogoutUseCase logoutUseCase,
+    required RestoreSessionUseCase restoreSessionUseCase,
   })  : _loginUseCase = loginUseCase,
         _registerUseCase = registerUseCase,
-        _logoutUseCase = logoutUseCase;
+        _logoutUseCase = logoutUseCase,
+        _restoreSessionUseCase = restoreSessionUseCase;
 
   final Rx<UserEntity?> currentUser = Rx<UserEntity?>(null);
   final RxBool isLoading = false.obs;
@@ -112,5 +115,16 @@ class AuthController extends GetxController {
     await _logoutUseCase();
     currentUser.value = null;
     Get.offAllNamed(AppRoutes.login);
+  }
+
+  Future<void> restoreSession() async {
+    appLogger.i('[AuthController] restoreSession called');
+    final user = await _restoreSessionUseCase();
+    if (user != null) {
+      currentUser.value = user;
+      appLogger.i('[AuthController] session restored — user: ${user.name}');
+    } else {
+      appLogger.d('[AuthController] no persisted session found');
+    }
   }
 }

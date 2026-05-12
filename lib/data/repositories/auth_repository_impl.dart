@@ -39,11 +39,20 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> logout() async {
     _currentUser = null;
-    dataSource.clearToken();
+    await dataSource.clearToken();
   }
 
   @override
   UserEntity? getCurrentUser() => _currentUser;
+
+  @override
+  Future<UserEntity?> restoreSession() async {
+    await dataSource.init();
+    if (dataSource.token == null) return null;
+    final user = await dataSource.getPersistedUser();
+    _currentUser = user;
+    return user;
+  }
 
   @override
   Future<Either<Failure, Unit>> forgotPassword(String email) async {

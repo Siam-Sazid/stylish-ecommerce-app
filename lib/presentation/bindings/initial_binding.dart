@@ -14,6 +14,7 @@ class InitialBinding implements Bindings {
         loginUseCase: LoginUseCase(Get.find<AuthRepository>()),
         registerUseCase: RegisterUseCase(Get.find<AuthRepository>()),
         logoutUseCase: LogoutUseCase(Get.find<AuthRepository>()),
+        restoreSessionUseCase: RestoreSessionUseCase(Get.find<AuthRepository>()),
       ),
       permanent: true,
     );

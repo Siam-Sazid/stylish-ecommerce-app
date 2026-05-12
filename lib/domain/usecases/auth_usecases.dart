@@ -35,3 +35,9 @@ class ResetPasswordUseCase {
   Future<Either<Failure, Unit>> call(String email, String otp, String newPassword) =>
       repository.resetPassword(email, otp, newPassword);
 }
+
+class RestoreSessionUseCase {
+  final AuthRepository repository;
+  RestoreSessionUseCase(this.repository);
+  Future<UserEntity?> call() => repository.restoreSession();
+}

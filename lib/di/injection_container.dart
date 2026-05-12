@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_config.dart';
 import '../data/datasources/product_datasource.dart';
 import '../data/datasources/auth_datasource.dart';
@@ -16,13 +17,16 @@ import '../domain/usecases/auth_usecases.dart';
 import '../domain/usecases/process_payment_usecase.dart';
 
 Future<void> initDependencies() async {
+  final prefs = await SharedPreferences.getInstance();
+  Get.put<SharedPreferences>(prefs);
+
   // Data sources (real API)
   Get.lazyPut<ProductDataSource>(
     () => ApiProductDataSource(baseUrl: AppConfig.baseUrl),
     fenix: true,
   );
   Get.lazyPut<AuthDataSource>(
-    () => ApiAuthDataSource(baseUrl: AppConfig.baseUrl),
+    () => ApiAuthDataSource(baseUrl: AppConfig.baseUrl, prefs: Get.find<SharedPreferences>()),
     fenix: true,
   );
 
@@ -59,6 +63,7 @@ Future<void> initDependencies() async {
   Get.lazyPut(() => LogoutUseCase(Get.find<AuthRepository>()), fenix: true);
   Get.lazyPut(() => ForgotPasswordUseCase(Get.find<AuthRepository>()), fenix: true);
   Get.lazyPut(() => ResetPasswordUseCase(Get.find<AuthRepository>()), fenix: true);
+  Get.lazyPut(() => RestoreSessionUseCase(Get.find<AuthRepository>()), fenix: true);
 
   // Payment use case
   Get.lazyPut(() => ProcessPaymentUseCase(Get.find<PaymentRepository>()), fenix: true);

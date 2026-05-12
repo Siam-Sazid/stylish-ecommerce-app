@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../controllers/auth_controller.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -28,8 +29,11 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
     _controller.forward();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) Get.offAllNamed(AppRoutes.login);
+    Future.delayed(const Duration(seconds: 2), () async {
+      if (!mounted) return;
+      final auth = Get.find<AuthController>();
+      await auth.restoreSession();
+      Get.offAllNamed(auth.isLoggedIn ? AppRoutes.main : AppRoutes.login);
     });
   }
 
