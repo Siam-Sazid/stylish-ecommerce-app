@@ -2,8 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../domain/entities/order_entity.dart';
 import '../../controllers/orders_controller.dart';
+import '../../widgets/shimmer_box.dart';
 
 class OrdersPage extends GetView<OrdersController> {
   const OrdersPage({super.key});
@@ -161,7 +163,12 @@ class _OrderItemRow extends StatelessWidget {
                     width: 52,
                     height: 52,
                     fit: BoxFit.cover,
-                    errorWidget: (_, _a, _b) => _imagePlaceholder(),
+                    placeholder: (_, __) => const ShimmerBox(width: 52, height: 52),
+                    errorWidget: (_, url, error) {
+                      appLogger.e('[OrderItem] Image failed', error: error);
+                      appLogger.d('[OrderItem] URL: $url');
+                      return _imagePlaceholder();
+                    },
                   )
                 : _imagePlaceholder(),
           ),

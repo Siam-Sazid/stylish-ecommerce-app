@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../controllers/auth_controller.dart';
+import '../../widgets/shimmer_box.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -52,6 +53,11 @@ class ProfilePage extends StatelessWidget {
                                   ? CachedNetworkImage(
                                       imageUrl: auth.currentUser.value!.avatarUrl!,
                                       fit: BoxFit.cover,
+                                      placeholder: (_, __) => const ShimmerBox(
+                                        width: 88,
+                                        height: 88,
+                                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                                      ),
                                       errorWidget: (_, __, ___) => _avatarPlaceholder(),
                                     )
                                   : _avatarPlaceholder(),

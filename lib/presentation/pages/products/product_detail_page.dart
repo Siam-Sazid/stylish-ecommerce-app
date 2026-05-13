@@ -3,8 +3,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/product_detail_controller.dart';
+import '../../widgets/shimmer_box.dart';
 
 class ProductDetailPage extends GetView<ProductDetailController> {
   const ProductDetailPage({super.key});
@@ -57,14 +59,15 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                   background: CachedNetworkImage(
                     imageUrl: controller.product.imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      color: AppColors.background,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: AppColors.background,
-                      child: const Icon(Icons.image_outlined, size: 80, color: AppColors.textHint),
-                    ),
+                    placeholder: (_, __) => const ShimmerBox(),
+                    errorWidget: (_, url, error) {
+                      appLogger.e('[ProductDetail] Image failed', error: error);
+                      appLogger.d('[ProductDetail] URL: $url');
+                      return Container(
+                        color: AppColors.background,
+                        child: const Icon(Icons.image_outlined, size: 80, color: AppColors.textHint),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -317,7 +320,7 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                   ),
                 ],
               ),
-              child: Obx(() => Row(
+              child: Row(
                     children: [
                       Container(
                         width: 54,
@@ -355,7 +358,7 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                         ),
                       ),
                     ],
-                  )),
+                  ),
             ),
           ),
         ],

@@ -3,7 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/utils/app_logger.dart';
 import '../../domain/entities/product_entity.dart';
+import 'shimmer_box.dart';
 
 class ProductCardWidget extends StatelessWidget {
   final ProductEntity product;
@@ -39,16 +41,15 @@ class ProductCardWidget extends StatelessWidget {
                       imageUrl: product.imageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (_, __) => Container(
-                        color: AppColors.background,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        color: AppColors.background,
-                        child: const Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
-                      ),
+                      placeholder: (_, __) => const ShimmerBox(),
+                      errorWidget: (_, url, error) {
+                        appLogger.e('[ProductCard] Image failed', error: error);
+                        appLogger.d('[ProductCard] URL: $url');
+                        return Container(
+                          color: AppColors.background,
+                          child: const Icon(Icons.image_outlined, size: 40, color: AppColors.textHint),
+                        );
+                      },
                     ),
                   ),
                   // Badge: discount or new

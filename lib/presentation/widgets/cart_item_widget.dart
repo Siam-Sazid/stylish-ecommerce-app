@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/app_logger.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../controllers/cart_controller.dart';
 import 'package:get/get.dart';
+import 'shimmer_box.dart';
 
 class CartItemWidget extends StatelessWidget {
   final CartItemEntity item;
@@ -32,14 +34,15 @@ class CartItemWidget extends StatelessWidget {
               width: 80,
               height: 80,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
-                color: AppColors.background,
-                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-              errorWidget: (_, __, ___) => Container(
-                color: AppColors.background,
-                child: const Icon(Icons.image_outlined, color: AppColors.textHint),
-              ),
+              placeholder: (_, __) => const ShimmerBox(width: 80, height: 80),
+              errorWidget: (_, url, error) {
+                appLogger.e('[CartItem] Image failed', error: error);
+                appLogger.d('[CartItem] URL: $url');
+                return Container(
+                  color: AppColors.background,
+                  child: const Icon(Icons.image_outlined, color: AppColors.textHint),
+                );
+              },
             ),
           ),
           const SizedBox(width: 12),
