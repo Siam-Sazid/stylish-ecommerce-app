@@ -15,18 +15,26 @@ import '../domain/usecases/product_usecases.dart';
 import '../domain/usecases/cart_usecases.dart';
 import '../domain/usecases/auth_usecases.dart';
 import '../domain/usecases/process_payment_usecase.dart';
+import '../data/datasources/order_datasource.dart';
+import '../data/repositories/order_repository_impl.dart';
+import '../domain/repositories/order_repository.dart';
+import '../domain/usecases/order_usecases.dart';
 
 Future<void> initDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs);
 
+  // Auth datasource — permanent so the in-memory token survives navigation cleanup
+  final authDataSource = ApiAuthDataSource(baseUrl: AppConfig.baseUrl, prefs: prefs);
+  Get.put<AuthDataSource>(authDataSource, permanent: true);
+
+  // Auth repository — permanent so the same instance is always found
+  final authRepository = AuthRepositoryImpl(authDataSource);
+  Get.put<AuthRepository>(authRepository, permanent: true);
+
   // Data sources (real API)
   Get.lazyPut<ProductDataSource>(
     () => ApiProductDataSource(baseUrl: AppConfig.baseUrl),
-    fenix: true,
-  );
-  Get.lazyPut<AuthDataSource>(
-    () => ApiAuthDataSource(baseUrl: AppConfig.baseUrl, prefs: Get.find<SharedPreferences>()),
     fenix: true,
   );
 
@@ -36,11 +44,15 @@ Future<void> initDependencies() async {
     fenix: true,
   );
   Get.lazyPut<CartRepository>(() => CartRepositoryImpl(), fenix: true);
-  Get.lazyPut<AuthRepository>(
-    () => AuthRepositoryImpl(Get.find<AuthDataSource>()),
+  Get.lazyPut<PaymentRepository>(() => PaymentRepositoryImpl(), fenix: true);
+  // Order datasource — passes the permanent authDataSource instance directly
+  Get.lazyPut<OrderDataSource>(
+    () => ApiOrderDataSource(
+      baseUrl: AppConfig.baseUrl,
+      authDataSource: authDataSource,
+    ),
     fenix: true,
   );
-  Get.lazyPut<PaymentRepository>(() => PaymentRepositoryImpl(), fenix: true);
 
   // Product use cases
   Get.lazyPut(() => GetAllProductsUseCase(Get.find<ProductRepository>()), fenix: true);
@@ -67,4 +79,12 @@ Future<void> initDependencies() async {
 
   // Payment use case
   Get.lazyPut(() => ProcessPaymentUseCase(Get.find<PaymentRepository>()), fenix: true);
+
+  // Order repository + use cases
+  Get.lazyPut<OrderRepository>(
+    () => OrderRepositoryImpl(Get.find<OrderDataSource>()),
+    fenix: true,
+  );
+  Get.lazyPut(() => GetOrdersUseCase(Get.find<OrderRepository>()), fenix: true);
+  Get.lazyPut(() => PlaceOrderUseCase(Get.find<OrderRepository>()), fenix: true);
 }

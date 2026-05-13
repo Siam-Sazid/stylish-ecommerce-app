@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../controllers/auth_controller.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -109,7 +110,7 @@ class ProfilePage extends StatelessWidget {
                   Text('Account', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   _MenuSection(items: [
-                    _MenuItem(icon: Icons.shopping_bag_outlined, label: 'My Orders', badge: '2 active', onTap: () {}),
+                    _MenuItem(icon: Icons.shopping_bag_outlined, label: 'My Orders', onTap: () => Get.toNamed(AppRoutes.orders)),
                     _MenuItem(icon: Icons.favorite_outline_rounded, label: 'Wishlist', onTap: () {}),
                     _MenuItem(icon: Icons.location_on_outlined, label: 'Addresses', onTap: () {}),
                     _MenuItem(icon: Icons.payment_outlined, label: 'Payment Methods', onTap: () {}),

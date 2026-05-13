@@ -13,6 +13,8 @@ import '../../presentation/pages/auth/reset_password_page.dart';
 import '../../presentation/pages/main/main_page.dart';
 import '../../presentation/pages/products/product_detail_page.dart';
 import '../../presentation/pages/checkout/checkout_page.dart';
+import '../../presentation/pages/orders/orders_page.dart';
+import '../../presentation/bindings/orders_binding.dart';
 
 class AppPages {
   static final routes = [
@@ -53,6 +55,11 @@ class AppPages {
       name: AppRoutes.checkout,
       page: () => const CheckoutPage(),
       binding: CheckoutBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.orders,
+      page: () => const OrdersPage(),
+      binding: OrdersBinding(),
     ),
   ];
 }
